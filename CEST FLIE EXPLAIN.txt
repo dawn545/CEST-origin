@@ -1,0 +1,13 @@
+CEST FLIE EXPLAIN
+
+//pcr中的Z值的偏频值全在offset.mat
+
+Z值本身是在zspect_dataavecorrect.mat 三维数组 长宽，偏频
+
+Z值转化为R1rou，减去R1rou water 得到R1rou_fit_LD.mat（用于拟合） （三维数组）
+
+Z stack 为五维，x y z offset B1 z值默认为1 即为Z值加B1
+
+最后所需的是利用插值重建Z值这个三维数组，可以输出得到的是的图像，以B1为x轴，Z为y轴
+
+输入的B1值需要留下一个做拟合的判断
