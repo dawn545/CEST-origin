@@ -24,7 +24,7 @@ function [Z_stack_corr] = Z_B1_correction(Z_stack,rel_B1map,B1_input,B1_output,S
 %   References:
 %   Windschuh, J., Zaiss, M., Meissner, J.-E., Paech, D., Radbruch, A., Ladd, M. E., and Bachert, P.(2015), 
 %   Correction of B1-inhomogeneities for relaxation-compensated CEST imaging at 7?T. 
-%   NMR Biomed., 28: 529–537. doi: 10.1002/nbm.3283.
+%   NMR Biomed., 28: 529ï¿½537. doi: 10.1002/nbm.3283.
 %
 %   Zaiss M, Windschuh J, Paech D, Meissner JE, Burth S, Schmitt B, Kickingereder P, Wiestler B, Wick W, Bendszus M, Schlemmer HP, Ladd ME, Bachert P, Radbruch A.
 %   Relaxation-compensated CEST-MRI of the human brain at 7T: Unbiased insight into NOE and amide signal changes in human glioblastoma.
@@ -58,14 +58,14 @@ abs_B1map=ones(mysize(1),mysize(2),mysize(3),numel(B1_input));
 if mysize(3)==1 % CEST is 2D
         for ii=1:numel(B1_input)
             abs_B1map(:,:,1,ii)= abs_B1map(:,:,1,ii)*B1_input(ii);
-            abs_B1map(:,:,1,ii)=abs_B1map(:,:,1,ii).*rel_B1map;
+            abs_B1map(:,:,1,ii)=abs_B1map(:,:,1,ii).*rel_B1map./2;
         end
 else % CEST is 3D
     if ndims(rel_B1map)==3
         for jj=1:mysize(3)
             for ii=1:numel(B1_input)
                 abs_B1map(:,:,jj,ii)= abs_B1map(:,:,jj,ii)*B1_input(ii);
-                abs_B1map(:,:,jj,ii)=abs_B1map(:,:,jj,ii).*rel_B1map(:,:,jj);
+                abs_B1map(:,:,jj,ii)=abs_B1map(:,:,jj,ii).*rel_B1map(:,:,jj)./2;
             end
         end   
     else
@@ -73,7 +73,7 @@ else % CEST is 3D
         for jj=1:mysize(3)
             for ii=1:numel(B1_input)
                 abs_B1map(:,:,jj,ii)= abs_B1map(:,:,jj,ii)*B1_input(ii);
-                abs_B1map(:,:,jj,ii)=abs_B1map(:,:,jj,ii).*rel_B1map(:,:);
+                abs_B1map(:,:,jj,ii)=abs_B1map(:,:,jj,ii).*rel_B1map(:,:,jj)./2;
             end
         end  
         
