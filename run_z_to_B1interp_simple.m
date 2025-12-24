@@ -143,7 +143,7 @@ rel_pixel = rel_B1map(cy,cx);                                  % 该像素的相
 % Use nominal B1 (as provided in B1_input) for plotting by default
 b1_nominal = double(B1_input(:));                              % 名义 B1 值
 b1_x = b1_nominal;                                              % 横坐标：名义 B1（不乘 rel_pixel）
-absB1_output_pixel = double(B1_output(:));                      % 校正后点横坐标（名义 B1）
+absB1_output_pixel = double(B1_output(:)) ;                      % 校正后点横坐标（名义 B1）
 
 % 1) 计算两种拟合/插值：smoothing spline（与原脚本一致）和 pchip（穿点插值）
 %    并在原始点位置上求值以方便对比
@@ -183,29 +183,41 @@ fprintf('RMSE fit (smoothing spline) = %.6g, RMSE pchip = %.6g\n', rmse_fit, rms
 
 % 2) 绘图：使用 pchip 作为默认可视化（保证通过点），同时绘制校正后点
 % Interpolate over the nominal B1 range so x-axis stays within provided B1_input
-B1_fine = linspace(min(b1_nominal), max(b1_nominal), 200);
-pchip_curve = interp1(b1_x, orig_vals, B1_fine, 'pchip');
+% ---- x 轴定义 ----
+b1_nominal = double(B1_input(:));              % 蓝线：名义 B1
+b1_actual  = b1_nominal * rel_pixel./2;       % 黄线：实际 B1
 
+% ---- 拟合原始曲线（名义 B1）----
+B1_fine_nom = linspace(min(b1_nominal), max(b1_nominal), 200);
+pchip_nom   = interp1(b1_nominal, orig_vals, B1_fine_nom, 'pchip');
+
+% ---- 绘图 ----
 fig = figure('Visible','off'); hold on; grid on;
-plot(B1_fine, pchip_curve, '-b', 'LineWidth',1.8);                % pchip 曲线
-plot(b1_x, orig_vals, 'ro', 'MarkerSize',8, 'DisplayName','orig');% 原数据点（名义 B1）
-plot(b1_x, corr_vals, 's-', 'Color',[0.85 0.65 0.13], 'LineWidth',2, 'DisplayName','corr'); % 校正后点（名义 B1）
 
-% 若用户还想看 smoothing spline 可选绘制（不默认）
-if strcmp(interp_plot_type,'smoothingspline')
-    try
-        spline_curve = cf(B1_fine(:))';
-        plot(B1_fine, spline_curve, '--', 'Color',[0 0.5 0], 'LineWidth',1.2, 'DisplayName','spline');
-    catch
-    end
-end
+% 蓝线：原始 Z-B1（名义）
+plot(b1_nominal, orig_vals, 'ro', ...
+    'MarkerSize',8, 'DisplayName','orig (nominal B1)');
+plot(B1_fine_nom, pchip_nom, '-b', ...
+    'LineWidth',1.8, 'DisplayName','orig fit (nominal B1)');
 
-xlabel('B1 (muT)'); ylabel('Z (a.u.)');
-title(sprintf('%s pixel(%d,%d) offset#%d (rel_pixel=%.3g)',series,cy,cx,coff,rel_val));
-legend('pchip fit','orig','corr');
-out_fig = fullfile(proj_root,sprintf('B1_interp_example_%s_simple_pixel_%d_%d.png',series,cy,cx));
+% 黄线：校正后 Z（实际 B1）
+plot(b1_actual, corr_vals, 's-', ...
+    'Color',[0.85 0.65 0.13], ...
+    'LineWidth',2, ...
+    'MarkerSize',7, ...
+    'DisplayName','B1-correct (actual B1)');
+
+xlabel('B1 (\muT)');
+ylabel('Z (a.u.)');
+title(sprintf('%s pixel(%d,%d) offset#%d  relB1=%.3g', ...
+    series, cy, cx, coff, rel_pixel));
+legend('Location','best');
+
+out_fig = fullfile(proj_root, ...
+    sprintf('B1_interp_example_%s_simple_pixel_%d_%d.png',series,cy,cx));
 saveas(fig, out_fig);
 close(fig);
+
 
 fprintf('Example plot saved to %s\n', out_fig);
 fprintf('Done.\n');                                            % 结束
